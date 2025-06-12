@@ -1,7 +1,6 @@
 package com.example.moneymanager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -75,19 +74,17 @@ public class LoginActivity extends AppCompatActivity {
                 String password = editTextPassword.getText().toString().trim();
 
                 if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(LoginActivity.this, "Por favor, ingrese correo y contraseña.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Por favor, ingrese su correo y contraseña", Toast.LENGTH_SHORT).show();
                 } else {
                     mAuth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
-                                        Log.d(TAG, "signInWithEmail:success");
                                         FirebaseUser user = mAuth.getCurrentUser();
                                         Toast.makeText(LoginActivity.this, "¡Inicio de sesión exitoso!", Toast.LENGTH_SHORT).show();
                                         navigateToDashboard();
                                     } else {
-                                        Log.w(TAG, "signInWithEmail:failure", task.getException());
                                         Toast.makeText(LoginActivity.this, "Autenticación fallida: " + task.getException().getMessage(),
                                                 Toast.LENGTH_LONG).show();
                                     }
@@ -123,20 +120,17 @@ public class LoginActivity extends AppCompatActivity {
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
             public void onCancel() {
-                Log.d(TAG, "facebook:onCancel");
-                Toast.makeText(LoginActivity.this, "Inicio de sesión con Facebook cancelado.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Inicio de sesión con Facebook cancelado", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(FacebookException error) {
-                Log.e(TAG, "facebook:onError", error);
-                Toast.makeText(LoginActivity.this, "Error al iniciar sesión con Facebook: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, "Error al iniciar sesión con Facebook" , Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -159,11 +153,9 @@ public class LoginActivity extends AppCompatActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
-                Log.w(TAG, "Google sign in failed", e);
-                Toast.makeText(LoginActivity.this, "Fallo al iniciar sesión con Google: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, "Fallo al iniciar sesión con Google", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -180,14 +172,11 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "signInWithCredential (Google) successful");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(LoginActivity.this, "¡Inicio de sesión con Google exitoso!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "¡Inicio de sesión con Google exitoso!",Toast.LENGTH_SHORT).show();
                             navigateToDashboard();
                         } else {
-                            Log.w(TAG, "signInWithCredential (Google) failed", task.getException());
-                            Toast.makeText(LoginActivity.this, "Autenticación de Firebase con Google fallida: " + task.getException().getMessage(),
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(LoginActivity.this, "Autenticación de Firebase con Google fallida",Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -198,22 +187,18 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
-
+        Log.d(TAG, "handleFacebookAccessToken:" + token); // en el log, mostramos el token de facebook
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "signInWithCredential (Facebook) successful");
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(LoginActivity.this, "¡Inicio de sesión con Facebook exitoso!", Toast.LENGTH_SHORT).show();
                             navigateToDashboard();
                         } else {
-                            Log.w(TAG, "signInWithCredential (Facebook) failed", task.getException());
-                            Toast.makeText(LoginActivity.this, "Autenticación de Firebase con Facebook fallida: " + task.getException().getMessage(),
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(LoginActivity.this, "Autenticación de Firebase con Facebook fallida",Toast.LENGTH_LONG).show();
                         }
                     }
                 });

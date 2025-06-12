@@ -10,7 +10,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class DashboardActivity extends AppCompatActivity {
-
     private FirebaseAuth mAuth;
     private BottomNavigationView bottomNavigationView;
 
@@ -46,7 +45,7 @@ public class DashboardActivity extends AppCompatActivity {
                         selectedFragment = new ResumenFragment();
                     } else if (itemId == R.id.nav_logout) {
                         mAuth.signOut();
-                        Toast.makeText(DashboardActivity.this, "Sesión cerrada.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DashboardActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(DashboardActivity.this, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
@@ -64,6 +63,6 @@ public class DashboardActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Toast.makeText(this, "Por favor, utiliza la opción 'Cerrar Sesión'.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Por favor, cierre sesión", Toast.LENGTH_SHORT).show();
     }
 }
