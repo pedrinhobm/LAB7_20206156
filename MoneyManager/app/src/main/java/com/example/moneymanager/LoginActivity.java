@@ -48,39 +48,28 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
-    private CallbackManager mCallbackManager; // Para Facebook
+    private CallbackManager mCallbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        // --- Inicialización de Firebase Auth ---
         mAuth = FirebaseAuth.getInstance();
 
-        // --- Configuración de Google Sign-In ---
-        // Se usa R.string.default_web_client_id que se genera en google-services.json
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // --- Inicialización de CallbackManager para Facebook ---
         mCallbackManager = CallbackManager.Factory.create();
 
-
-        // --- Inicialización de componentes de UI ---
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
         textViewRegister = findViewById(R.id.textViewRegister);
         signInButtonGoogle = findViewById(R.id.signInButtonGoogle);
         buttonFacebookLogin = findViewById(R.id.buttonFacebookLogin);
-
-        // --- Listeners de Eventos ---
-
-        // Listener para Email/Password Login
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,7 +99,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Listener para ir a la pantalla de Registro
         textViewRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,7 +106,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Listener para Google Sign-In
         signInButtonGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,7 +113,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Listener para Facebook Sign-In
         buttonFacebookLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,7 +120,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Registrar el Callback para el inicio de sesión de Facebook
+        // el registro de facebook me guie de este link https://www.youtube.com/watch?feature=shared&v=RzcO1yu8nN8
+        // de este link igual https://developers.facebook.com/docs/facebook-login/android/
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -156,31 +143,23 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // --- Métodos de ciclo de vida de la actividad ---
     @Override
     public void onStart() {
         super.onStart();
-        // Verificar si el usuario ya ha iniciado sesión (no es nulo) y actualizar la UI.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
-            // Si ya hay un usuario logueado, vamos directamente al dashboard
             navigateToDashboard();
         }
     }
 
-    // --- Manejo de resultados de otras actividades (Google y Facebook) ---
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Pasar el resultado a Facebook SDK
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
 
-        // Resultado de Google Sign-In
         if (requestCode == RC_SIGN_IN_GOOGLE) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                // El inicio de sesión de Google fue exitoso, autenticar con Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
@@ -190,8 +169,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
     }
-
-    // --- Métodos de autenticación ---
 
     private void signInWithGoogle() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -219,7 +196,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInWithFacebook() {
-        // Solicitar permisos de Facebook. 'email' y 'public_profile' son comunes.
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
     }
 
@@ -249,6 +225,6 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish(); // Cerrar LoginActivity para que el usuario no pueda volver con el botón de atrás
+        finish();
     }
 }
