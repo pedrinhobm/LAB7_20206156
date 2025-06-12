@@ -36,7 +36,7 @@ public class DashboardActivity extends AppCompatActivity {
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Fragment selectedFragment = null;
 
-                    int itemId = item.getItemId(); // Obtener el ID del item seleccionado
+                    int itemId = item.getItemId();
 
                     if (itemId == R.id.nav_ingresos) {
                         selectedFragment = new IngresosFragment();
