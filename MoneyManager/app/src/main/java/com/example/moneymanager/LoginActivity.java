@@ -117,6 +117,8 @@ public class LoginActivity extends AppCompatActivity {
 
         // el registro de facebook me guie de este link https://www.youtube.com/watch?feature=shared&v=RzcO1yu8nN8
         // de este link igual https://developers.facebook.com/docs/facebook-login/android/
+        // en este caso he seguido el procedimiento correspondiente para autenticar con mi cuenta de Facebook
+        // adjunto las evidencias que sí funcionó en el pdf del proyecto
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
