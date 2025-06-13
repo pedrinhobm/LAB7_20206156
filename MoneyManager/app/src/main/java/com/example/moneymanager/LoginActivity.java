@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                 String password = editTextPassword.getText().toString().trim();
 
                 if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(LoginActivity.this, "Por favor, ingrese su correo y contraseña", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Ingrese su correo y contraseña",Toast.LENGTH_SHORT).show();
                 } else {
                     mAuth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
@@ -82,11 +82,10 @@ public class LoginActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
                                         FirebaseUser user = mAuth.getCurrentUser();
-                                        Toast.makeText(LoginActivity.this, "¡Inicio de sesión exitoso!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LoginActivity.this, "Inicio de sesión exitoso",Toast.LENGTH_SHORT).show();
                                         navigateToDashboard();
                                     } else {
-                                        Toast.makeText(LoginActivity.this, "Autenticación fallida: " + task.getException().getMessage(),
-                                                Toast.LENGTH_LONG).show();
+                                        Toast.makeText(LoginActivity.this, "Autenticación fallida",Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });
@@ -127,12 +126,12 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-                Toast.makeText(LoginActivity.this, "Inicio de sesión con Facebook cancelado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Inicio de sesión con Facebook cancelado",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(FacebookException error) {
-                Toast.makeText(LoginActivity.this, "Error al iniciar sesión con Facebook" , Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, "Error al iniciar sesión con Facebook",Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -157,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
-                Toast.makeText(LoginActivity.this, "Fallo al iniciar sesión con Google", Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, "Fallo al iniciar sesión con Google",Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -175,7 +174,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(LoginActivity.this, "¡Inicio de sesión con Google exitoso!",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Inicio de sesión con Google exitoso",Toast.LENGTH_SHORT).show();
                             navigateToDashboard();
                         } else {
                             Toast.makeText(LoginActivity.this, "Autenticación de Firebase con Google fallida",Toast.LENGTH_LONG).show();
@@ -197,7 +196,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(LoginActivity.this, "¡Inicio de sesión con Facebook exitoso!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Inicio de sesión con Facebook exitoso", Toast.LENGTH_SHORT).show();
                             navigateToDashboard();
                         } else {
                             Toast.makeText(LoginActivity.this, "Autenticación de Firebase con Facebook fallida",Toast.LENGTH_LONG).show();
