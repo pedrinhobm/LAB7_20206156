@@ -12,7 +12,7 @@
         android:id="@+id/egresosTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mis Egresos"
+        android:text="Egresos"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="?attr/colorPrimary"
@@ -44,6 +44,5 @@
         app:backgroundTint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="Agregar Egreso" />
-
+        android:contentDescription="Añadir"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

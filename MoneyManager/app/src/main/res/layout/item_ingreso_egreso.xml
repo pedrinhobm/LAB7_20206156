@@ -24,7 +24,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/textViewMonto"
             android:layout_marginEnd="8dp"
-            tools:text="Título del Ingreso/Egreso" />
+            tools:text="Título" />
 
         <TextView
             android:id="@+id/textViewMonto"
@@ -57,7 +57,7 @@
             app:layout_constraintTop_toBottomOf="@id/textViewFecha"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:text="Descripción detallada del movimiento." />
+            tools:text="Descripción" />
 
         <ImageButton
             android:id="@+id/buttonEdit"
@@ -81,6 +81,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/textViewDescripcion"
             app:layout_constraintBottom_toBottomOf="@id/textViewDescripcion" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

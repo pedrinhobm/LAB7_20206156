@@ -12,7 +12,7 @@
         android:id="@+id/resumenTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Resumen Mensual"
+        android:text="Resumen"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="?attr/colorPrimary"
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_expense"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Mes anterior" />
+            android:contentDescription="Mes anterior"/>
 
         <TextView
             android:id="@+id/textViewSelectedMonth"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_income"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Mes siguiente" />
+            android:contentDescription="Mes siguiente"/>
 
     </LinearLayout>
 
@@ -112,7 +112,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/holo_green_dark"
-                tools:text="Total Ingresos: S/. 0.00" />
+                tools:text="Total de ingresos: S/. 0.00" />
 
             <TextView
                 android:id="@+id/textViewTotalEgresos"
@@ -122,7 +122,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/holo_red_dark"
-                tools:text="Total Egresos: S/. 0.00" />
+                tools:text="Total de egresos: S/. 0.00" />
 
             <TextView
                 android:id="@+id/textViewConsolidado"
@@ -132,8 +132,6 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 tools:text="Consolidado: S/. 0.00" />
-
         </LinearLayout>
     </ScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
