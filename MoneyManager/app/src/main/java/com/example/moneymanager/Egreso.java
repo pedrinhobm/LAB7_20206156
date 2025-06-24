@@ -1,6 +1,7 @@
 package com.example.moneymanager;
-import com.google.firebase.firestore.Exclude;
+
 import java.util.Date;
+
 public class Egreso {
     private String id;
     private String userId;
@@ -8,18 +9,32 @@ public class Egreso {
     private double monto;
     private String descripcion;
     private Date fecha;
+    private String comprobanteUrl;
 
     public Egreso() {
+        // Constructor vacío requerido por Firestore
     }
+
     public Egreso(String userId, String titulo, double monto, String descripcion, Date fecha) {
         this.userId = userId;
         this.titulo = titulo;
         this.monto = monto;
         this.descripcion = descripcion;
         this.fecha = fecha;
+        this.comprobanteUrl = null; // Por defecto sin comprobante
     }
 
-    @Exclude
+    // Nuevo constructor para incluir el comprobanteUrl
+    public Egreso(String userId, String titulo, double monto, String descripcion, Date fecha, String comprobanteUrl) {
+        this.userId = userId;
+        this.titulo = titulo;
+        this.monto = monto;
+        this.descripcion = descripcion;
+        this.fecha = fecha;
+        this.comprobanteUrl = comprobanteUrl;
+    }
+
+    // Getters y Setters
     public String getId() {
         return id;
     }
@@ -67,5 +82,13 @@ public class Egreso {
     public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
-}
 
+    // Getter y Setter para comprobanteUrl
+    public String getComprobanteUrl() {
+        return comprobanteUrl;
+    }
+
+    public void setComprobanteUrl(String comprobanteUrl) {
+        this.comprobanteUrl = comprobanteUrl;
+    }
+}

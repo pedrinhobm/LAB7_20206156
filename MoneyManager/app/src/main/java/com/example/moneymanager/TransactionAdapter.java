@@ -1,34 +1,42 @@
 package com.example.moneymanager;
-import android.app.AlertDialog;
+
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+
+import com.squareup.picasso.Picasso;
+
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+
 public class TransactionAdapter<T> extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
+
+    private final Context context;
     private List<T> transactionList;
-    private Context context;
-    private boolean isIngreso; // este boolean sirve para determinar si es un ingresos, gresos
-    private OnTransactionActionListener<T> listener; // aqui si usa IA porque esta variable servirá para acciones de editar y eliminar
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
+    private final boolean isIngreso;
+    private final OnTransactionActionListener<T> listener;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+    public interface OnTransactionActionListener<T> {
+        void onEditClick(String transactionId, T transaction);
+        void onDeleteClick(String transactionId, T transaction);
+        // CAMBIO CRUCIAL AQUÍ: El primer parámetro DEBE ser la URL
+        void onDownloadClick(String comprobanteUrl, T transaction);
+    }
 
     public TransactionAdapter(Context context, List<T> transactionList, boolean isIngreso, OnTransactionActionListener<T> listener) {
         this.context = context;
         this.transactionList = transactionList;
         this.isIngreso = isIngreso;
         this.listener = listener;
-        this.db = FirebaseFirestore.getInstance();
-        this.mAuth = FirebaseAuth.getInstance();
     }
 
     public void setTransactionList(List<T> transactionList) {
@@ -47,60 +55,65 @@ public class TransactionAdapter<T> extends RecyclerView.Adapter<TransactionAdapt
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         T transaction = transactionList.get(position);
 
+        String id;
         String titulo;
         double monto;
         String descripcion;
-        java.util.Date fecha;
-        String transactionId;
+        String fecha;
+        String comprobanteUrl = null; // Correcto: se inicializa a null, se le asigna un valor más abajo
 
-        if (isIngreso) { // con el mismo booleano recolectamos los datos de cada uno , lo mismo con egreso
-            Ingreso ingreso = (Ingreso) transaction; // el titulo, monto numérico, la descripcion, fecha y el id
+        if (isIngreso) {
+            Ingreso ingreso = (Ingreso) transaction;
+            id = ingreso.getId();
             titulo = ingreso.getTitulo();
             monto = ingreso.getMonto();
             descripcion = ingreso.getDescripcion();
-            fecha = ingreso.getFecha();
-            transactionId = ingreso.getId();
+            fecha = (ingreso.getFecha() != null) ? dateFormat.format(ingreso.getFecha()) : "N/A";
+            comprobanteUrl = ingreso.getComprobanteUrl();
         } else {
             Egreso egreso = (Egreso) transaction;
+            id = egreso.getId();
             titulo = egreso.getTitulo();
             monto = egreso.getMonto();
             descripcion = egreso.getDescripcion();
-            fecha = egreso.getFecha();
-            transactionId = egreso.getId();
+            fecha = (egreso.getFecha() != null) ? dateFormat.format(egreso.getFecha()) : "N/A";
+            comprobanteUrl = egreso.getComprobanteUrl();
         }
 
-        holder.textViewTitulo.setText(titulo);
+        holder.tituloTextView.setText(titulo);
+        holder.montoTextView.setText(String.format(Locale.getDefault(), "S/.%.2f", monto));
+        holder.descripcionTextView.setText(descripcion);
+        holder.fechaTextView.setText(fecha);
 
-
-        String montoFormateado = String.format(Locale.getDefault(), "S/. %.2f", monto);
-        if (isIngreso) { // aqui formateo los ingresos con el booleano
-            holder.textViewMonto.setText("+ " + montoFormateado);
-            holder.textViewMonto.setTextColor(context.getResources().getColor(android.R.color.holo_green_dark));
-        } else { // aqui formateo los egresos
-            holder.textViewMonto.setText("- " + montoFormateado);
-            holder.textViewMonto.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
-        }
-
-        if (fecha != null) { // este es el caso de la fecha que será día, mes y año
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            holder.textViewFecha.setText(sdf.format(fecha));
+        if (isIngreso) {
+            holder.montoTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
         } else {
-            holder.textViewFecha.setText("");
+            holder.montoTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
         }
 
-        holder.textViewDescripcion.setText(descripcion);
+        // Asegúrate de que comprobanteUrl se maneja correctamente aquí
+        if (comprobanteUrl != null && !comprobanteUrl.isEmpty()) {
+            holder.imageViewComprobanteItem.setVisibility(View.VISIBLE);
+            holder.buttonDownload.setVisibility(View.VISIBLE);
+            Picasso.get()
+                    .load(comprobanteUrl)
+                    .placeholder(R.drawable.ic_image_placeholder)
+                    .error(R.drawable.ic_image_placeholder)
+                    .into(holder.imageViewComprobanteItem);
+        } else {
+            holder.imageViewComprobanteItem.setVisibility(View.GONE);
+            holder.imageViewComprobanteItem.setImageDrawable(null);
+            holder.buttonDownload.setVisibility(View.GONE);
+        }
 
-        holder.buttonEdit.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onEditClick(transactionId, transaction);
-            }
-        });
+        // Asegúrate de que 'id' es final o efectivamente final si se usa en el listener de borrado o edición
+        final String finalId = id;
 
-        holder.buttonDelete.setOnClickListener(v -> {
-            if (listener != null) {
-                showDeleteConfirmationDialog(transactionId, transaction);
-            }
-        });
+        // CAMBIO AQUÍ: Pasa la comprobanteUrl real al listener de descarga
+        final String finalComprobanteUrl = comprobanteUrl; // Hazla final para usarla en el lambda
+        holder.editButton.setOnClickListener(v -> listener.onEditClick(finalId, transaction));
+        holder.deleteButton.setOnClickListener(v -> listener.onDeleteClick(finalId, transaction));
+        holder.buttonDownload.setOnClickListener(v -> listener.onDownloadClick(finalComprobanteUrl, transaction)); // <-- ¡CORREGIDO!
     }
 
     @Override
@@ -108,35 +121,26 @@ public class TransactionAdapter<T> extends RecyclerView.Adapter<TransactionAdapt
         return transactionList.size();
     }
 
-    private void showDeleteConfirmationDialog(String transactionId, T transaction) {
-        new AlertDialog.Builder(context) // la accion de eliminar tambien contiene
-                .setTitle("Confirmar Eliminación") // la alerta que confirme si eliminamos ingreso o egreso
-                .setMessage("¿Estás seguro de que quieres eliminar este elemento?")
-                .setPositiveButton("Sí", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        listener.onDeleteClick(transactionId, transaction);
-                    }
-                })
-                .setNegativeButton("No", null)
-                .show();
-    }
-
     public static class TransactionViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewTitulo, textViewMonto, textViewFecha, textViewDescripcion;
-        ImageButton buttonEdit, buttonDelete;
+        TextView tituloTextView;
+        TextView montoTextView;
+        TextView descripcionTextView;
+        TextView fechaTextView;
+        ImageView imageViewComprobanteItem;
+        Button editButton;
+        Button deleteButton;
+        Button buttonDownload;
 
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
-            textViewTitulo = itemView.findViewById(R.id.textViewTitulo);
-            textViewMonto = itemView.findViewById(R.id.textViewMonto);
-            textViewFecha = itemView.findViewById(R.id.textViewFecha);
-            textViewDescripcion = itemView.findViewById(R.id.textViewDescripcion);
-            buttonEdit = itemView.findViewById(R.id.buttonEdit);
-            buttonDelete = itemView.findViewById(R.id.buttonDelete);
+            tituloTextView = itemView.findViewById(R.id.textViewTitulo);
+            montoTextView = itemView.findViewById(R.id.textViewMonto);
+            descripcionTextView = itemView.findViewById(R.id.textViewDescripcion);
+            fechaTextView = itemView.findViewById(R.id.textViewFecha);
+            imageViewComprobanteItem = itemView.findViewById(R.id.imageViewComprobanteItem);
+            editButton = itemView.findViewById(R.id.buttonEdit);
+            deleteButton = itemView.findViewById(R.id.buttonDelete);
+            buttonDownload = itemView.findViewById(R.id.buttonDownload);
         }
-    }
-    public interface OnTransactionActionListener<T> { // aqui realizamos CRUDs de editar y eliminar
-        void onEditClick(String transactionId, T transaction);
-        void onDeleteClick(String transactionId, T transaction);
     }
 }
