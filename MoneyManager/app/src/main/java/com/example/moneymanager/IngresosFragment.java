@@ -205,8 +205,8 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
             if (ingresoToEdit.getFecha() != null) {
                 editTextFecha.setText(sdf.format(ingresoToEdit.getFecha()));
             }
-            editTextTitulo.setEnabled(false); // Can't change title on edit for ingresos too
-            editTextFecha.setEnabled(false); // Can't change date on edit for ingresos too
+            //editTextTitulo.setEnabled(false); 
+            //editTextFecha.setEnabled(false);
 
             // Load existing image if URL is present
             if (ingresoToEdit.getComprobanteUrl() != null && !ingresoToEdit.getComprobanteUrl().isEmpty()) {

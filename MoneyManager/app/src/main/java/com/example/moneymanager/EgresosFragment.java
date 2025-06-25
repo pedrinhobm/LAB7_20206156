@@ -205,8 +205,8 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
             if (egresoToEdit.getFecha() != null) {
                 editTextFecha.setText(sdf.format(egresoToEdit.getFecha()));
             }
-            editTextTitulo.setEnabled(false);
-            editTextFecha.setEnabled(false);
+            //editTextTitulo.setEnabled(false);
+            //editTextFecha.setEnabled(false);
 
             if (egresoToEdit.getComprobanteUrl() != null && !egresoToEdit.getComprobanteUrl().isEmpty()) {
                 Picasso.get()
