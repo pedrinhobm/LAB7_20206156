@@ -24,7 +24,6 @@ android {
         }
     }
     compileOptions {
-        // Ensure you are using Java 11 or higher for Cloudinary SDK 3.x
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
@@ -32,45 +31,30 @@ android {
 
 dependencies {
 
-    // Core AndroidX libraries (already using libs.appcompat, etc. so these are redundant)
     // implementation libs.appcompat
     // implementation libs.material
     // implementation libs.activity
     // implementation libs.constraintlayout
 
-    // Core AndroidX libraries, if not using version catalogs, uncomment these
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.activity:activity-ktx:1.9.0'
     implementation 'androidx.fragment:fragment-ktx:1.7.1'
-
-
-    // Firebase BOM (ensure this version is up-to-date and compatible)
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-
-    // Google Play Services Auth for Firebase/Google Sign-In
     implementation 'com.google.android.gms:play-services-auth:21.3.0'
-
-    // Facebook SDK
     implementation 'com.facebook.android:facebook-android-sdk:18.0.3'
-    implementation 'com.facebook.android:facebook-login:latest.release' // Use 'latest.release' or a specific version like 18.0.3
-
+    implementation 'com.facebook.android:facebook-login:latest.release'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.1'
-
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.cloudinary:cloudinary-android:3.0.2'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
-
-    // Testing dependencies (also potentially redundant if using libs.junit etc.)
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-
-    // If not using libs.junit etc., uncomment these:
     // testImplementation 'junit:junit:4.13.2'
     // androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     // androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'

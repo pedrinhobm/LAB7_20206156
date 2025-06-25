@@ -1,5 +1,4 @@
 package com.example.moneymanager;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -19,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -28,7 +26,6 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,7 +34,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.squareup.picasso.Picasso;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,7 +56,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
     private Uri selectedImageUri;
     private ImageView imageViewComprobante;
     private ServicioAlmacenamiento servicioAlmacenamiento;
-    private static final String TAG = "IngresosFragment"; // Add TAG for logging
+    private static final String TAG = "IngresosFragment";
 
     private final ActivityResultLauncher<String> selectImageLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -87,7 +83,6 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                 }
             });
 
-
     public IngresosFragment() {
     }
 
@@ -101,9 +96,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
 
         if (getActivity() != null) {
             servicioAlmacenamiento = ((MyApplication) getActivity().getApplication()).getServicioAlmacenamiento();
-            Log.d(TAG, "ServicioAlmacenamiento obtenido de MyApplication.");
         } else {
-            Log.e(TAG, "Error: Actividad nula al intentar obtener ServicioAlmacenamiento. Inicializando localmente (fallback).");
             servicioAlmacenamiento = new ServicioAlmacenamiento(getContext());
         }
     }
@@ -111,13 +104,13 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_ingresos, container, false); // Asegúrate de que tienes fragment_ingresos.xml
+        View view = inflater.inflate(R.layout.fragment_ingresos, container, false);
 
-        recyclerViewIngresos = view.findViewById(R.id.recyclerViewIngresos); // Asumiendo este ID en fragment_ingresos
+        recyclerViewIngresos = view.findViewById(R.id.recyclerViewIngresos);
         recyclerViewIngresos.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new TransactionAdapter<>(getContext(), ingresosList, true, this); // 'true' for ingresos
+        adapter = new TransactionAdapter<>(getContext(), ingresosList, true, this);
         recyclerViewIngresos.setAdapter(adapter);
-        fabAddIngreso = view.findViewById(R.id.fabAddIngreso); // Asumiendo este ID en fragment_ingresos
+        fabAddIngreso = view.findViewById(R.id.fabAddIngreso);
         fabAddIngreso.setOnClickListener(v -> showAddEditTransactionDialog(null));
 
         if (currentUser == null) {
@@ -138,7 +131,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
     private void loadIngresos() {
         if (currentUser == null)
             return;
-        db.collection("ingresos") // Change to "ingresos" collection
+        db.collection("ingresos")
                 .whereEqualTo("userId", currentUser.getUid())
                 .orderBy("fecha", Query.Direction.DESCENDING)
                 .get()
@@ -149,11 +142,8 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                             Ingreso ingreso = document.toObject(Ingreso.class);
                             if (ingreso != null) {
                                 ingreso.setId(document.getId());
-
-                                // IMPORTANTE: Revisa la URL aquí y asegúrate de que sea HTTPS
                                 String urlFromFirebase = ingreso.getComprobanteUrl();
                                 if (urlFromFirebase != null && urlFromFirebase.startsWith("http://")) {
-                                    Log.w(TAG, "Firebase Ingreso URL es HTTP, convirtiendo a HTTPS: " + urlFromFirebase);
                                     ingreso.setComprobanteUrl(urlFromFirebase.replace("http://", "https://"));
                                 } else {
                                     Log.d(TAG, "Firebase Ingreso URL es ya HTTPS o nula: " + urlFromFirebase);
@@ -167,8 +157,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                         });
                         adapter.setTransactionList(ingresosList);
                     } else {
-                        Toast.makeText(getContext(), "Error al cargar ingresos: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error loading ingresos", task.getException());
+                        Toast.makeText(getContext(), "Error al cargar ingresos", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -178,7 +167,6 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_add_edit_transaction, null);
         builder.setView(dialogView);
-
         EditText editTextTitulo = dialogView.findViewById(R.id.editTextTitulo);
         EditText editTextMonto = dialogView.findViewById(R.id.editTextMonto);
         EditText editTextDescripcion = dialogView.findViewById(R.id.editTextDescripcion);
@@ -186,10 +174,8 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
         Button buttonSave = dialogView.findViewById(R.id.buttonSave);
         Button buttonCancel = dialogView.findViewById(R.id.buttonCancel);
         TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
-
         imageViewComprobante = dialogView.findViewById(R.id.imageViewComprobante);
         Button buttonSelectImage = dialogView.findViewById(R.id.buttonSelectImage);
-
         selectedImageUri = null;
         imageViewComprobante.setImageResource(R.drawable.ic_image_placeholder);
         imageViewComprobante.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -205,10 +191,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
             if (ingresoToEdit.getFecha() != null) {
                 editTextFecha.setText(sdf.format(ingresoToEdit.getFecha()));
             }
-            //editTextTitulo.setEnabled(false); 
-            //editTextFecha.setEnabled(false);
 
-            // Load existing image if URL is present
             if (ingresoToEdit.getComprobanteUrl() != null && !ingresoToEdit.getComprobanteUrl().isEmpty()) {
                 Picasso.get()
                         .load(ingresoToEdit.getComprobanteUrl())
@@ -236,7 +219,6 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                     calendar.setTime(sdf.parse(editTextFecha.getText().toString()));
                 } catch (Exception e) {
                     Toast.makeText(getContext(), "Formato de fecha inválido. Usando fecha actual.", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error parsing date: " + e.getMessage());
                 }
             }
 
@@ -255,7 +237,6 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
         });
 
         buttonSelectImage.setOnClickListener(v -> selectImageLauncher.launch("image/*"));
-
 
         buttonSave.setOnClickListener(v -> {
             String titulo = editTextTitulo.getText().toString().trim();
@@ -286,7 +267,6 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                 fecha = sdf.parse(fechaStr);
             } catch (java.text.ParseException e) {
                 Toast.makeText(getContext(), "Formato de fecha no válido", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Error parsing date: " + e.getMessage());
                 return;
             }
 
@@ -296,18 +276,17 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
             }
 
             if (selectedImageUri != null) {
-                Toast.makeText(getContext(), "Subiendo comprobante...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Subiendo comprobante", Toast.LENGTH_SHORT).show();
                 servicioAlmacenamiento.guardarArchivo(selectedImageUri, new ServicioAlmacenamiento.UploadResultListener() {
                     @Override
                     public void onSuccess(String url) {
-                        Toast.makeText(getContext(), "Comprobante subido.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Comprobante subido", Toast.LENGTH_SHORT).show();
                         saveOrUpdateIngreso(ingresoToEdit, titulo, monto, descripcion, fecha, url, dialog);
                     }
 
                     @Override
                     public void onFailure(String error) {
-                        Toast.makeText(getContext(), "Error al subir comprobante: " + error, Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Error uploading file: " + error);
+                        Toast.makeText(getContext(), "Error al subir comprobante", Toast.LENGTH_LONG).show();
                         saveOrUpdateIngreso(ingresoToEdit, titulo, monto, descripcion, fecha, (ingresoToEdit != null ? ingresoToEdit.getComprobanteUrl() : null), dialog);
                     }
                 });
@@ -322,40 +301,38 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
 
     private void saveOrUpdateIngreso(@Nullable Ingreso ingresoToEdit, String titulo, double monto, String descripcion, Date fecha, @Nullable String comprobanteUrl, AlertDialog dialog) { // Change type to Ingreso
         if (ingresoToEdit != null) {
-            DocumentReference ingresoRef = db.collection("ingresos").document(ingresoToEdit.getId()); // Change collection to "ingresos"
+            DocumentReference ingresoRef = db.collection("ingresos").document(ingresoToEdit.getId());
             ingresoRef.update("monto", monto, "descripcion", descripcion, "fecha", fecha, "comprobanteUrl", comprobanteUrl)
                     .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(getContext(), "Ingreso actualizado con éxito",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Ingreso actualizado",Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                         loadIngresos();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error al actualizar ingreso: " + e.getMessage(),Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error updating ingreso", e);
+                        Toast.makeText(getContext(), "Error al actualizar ingreso",Toast.LENGTH_SHORT).show();
                     });
         } else {
             Ingreso nuevoIngreso = new Ingreso(currentUser.getUid(), titulo, monto, descripcion, fecha, comprobanteUrl); // Change to Ingreso
-            db.collection("ingresos") // Change collection to "ingresos"
+            db.collection("ingresos")
                     .add(nuevoIngreso)
                     .addOnSuccessListener(documentReference -> {
-                        Toast.makeText(getContext(), "Ingreso agregado con éxito",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Ingreso agregado",Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                         loadIngresos();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error al agregar ingreso: " + e.getMessage(),Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error adding ingreso", e);
+                        Toast.makeText(getContext(), "Error al agregar ingreso",Toast.LENGTH_SHORT).show();
                     });
         }
     }
 
     @Override
-    public void onEditClick(String transactionId, Ingreso ingreso) { // Change type to Ingreso
+    public void onEditClick(String transactionId, Ingreso ingreso) {
         showAddEditTransactionDialog(ingreso);
     }
 
     @Override
-    public void onDeleteClick(String transactionId, Ingreso ingreso) { // Change type to Ingreso
+    public void onDeleteClick(String transactionId, Ingreso ingreso) {
         if (currentUser == null) {
             Toast.makeText(getContext(), "Usuario no autenticado", Toast.LENGTH_SHORT).show();
             return;
@@ -364,24 +341,20 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
         db.collection("ingresos").document(transactionId) // Change collection to "ingresos"
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Ingreso eliminado con éxito",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Ingreso eliminado",Toast.LENGTH_SHORT).show();
                     loadIngresos();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error al eliminar ingreso: " + e.getMessage(),Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error deleting ingreso", e);
+                    Toast.makeText(getContext(), "Error al eliminar ingreso",Toast.LENGTH_SHORT).show();
                 });
     }
 
     @Override
     public void onDownloadClick(String comprobanteUrl, Ingreso ingreso) {
         if (comprobanteUrl != null && !comprobanteUrl.isEmpty()) {
-            Log.d(TAG, "Intentando descargar URL de Firestore (en onDownloadClick): " + comprobanteUrl);
-
             final String finalDownloadUrl;
             if (comprobanteUrl.startsWith("http://")) {
                 finalDownloadUrl = comprobanteUrl.replace("http://", "https://");
-                Log.w(TAG, "Corrigiendo URL de descarga a HTTPS: " + finalDownloadUrl);
             } else {
                 finalDownloadUrl = comprobanteUrl;
             }
@@ -389,29 +362,23 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
             servicioAlmacenamiento.obtenerArchivo(finalDownloadUrl, new ServicioAlmacenamiento.DownloadResultListener() {
                 @Override
                 public void onSuccess(File file) {
-                    Toast.makeText(getContext(), "Comprobante descargado: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Comprobante descargado", Toast.LENGTH_LONG).show();
                     openFile(file);
-                    Log.d(TAG, "DEBUG: Archivo descargado path: " + file.getAbsolutePath());
-                    Log.d(TAG, "DEBUG: Archivo existe? " + file.exists());
-                    Log.d(TAG, "DEBUG: Archivo es legible? " + file.canRead());
-                    Log.d(TAG, "DEBUG: Tamaño del archivo: " + file.length() + " bytes");
                 }
 
                 @Override
                 public void onFailure(String error) {
-                    Toast.makeText(getContext(), "Error al descargar comprobante: " + error, Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "Descarga fallida para URL: " + finalDownloadUrl + " Error: " + error);
+                    Toast.makeText(getContext(), "Error al descargar comprobante", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(getContext(), "No hay comprobante asociado a esta transacción.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "No hay comprobante asociado", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void openFile(File file) {
         if (!file.exists()) {
-            Toast.makeText(getContext(), "El archivo descargado no existe.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Intento de abrir archivo que no existe: " + file.getAbsolutePath());
+            Toast.makeText(getContext(), "El archivo descargado no existe", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -427,18 +394,14 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
             if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
             } else {
-                Toast.makeText(getContext(), "No hay aplicación para abrir este tipo de archivo.", Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "No hay aplicación disponible para abrir el archivo con MIME type: " + (mimeType != null ? mimeType : "*/*"));
+                Toast.makeText(getContext(), "No hay aplicación para abrir este tipo de archivo", Toast.LENGTH_SHORT).show();
             }
         } catch (IllegalArgumentException e) {
-            Toast.makeText(getContext(), "Error de configuración al abrir el archivo: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Error de FileProvider: " + e.getMessage(), e);
+            Toast.makeText(getContext(), "Error de configuración al abrir el archivo", Toast.LENGTH_LONG).show();
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(getContext(), "No se encontró una aplicación para abrir el archivo.", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "ActivityNotFoundException al abrir el archivo: " + e.getMessage(), e);
+            Toast.makeText(getContext(), "No se encontró una aplicación para abrir el archivo", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Error inesperado al intentar abrir el archivo: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Error general al abrir el archivo: " + e.getMessage(), e);
+            Toast.makeText(getContext(), "Error inesperado al intentar abrir el archivo", Toast.LENGTH_LONG).show();
         }
     }
 }

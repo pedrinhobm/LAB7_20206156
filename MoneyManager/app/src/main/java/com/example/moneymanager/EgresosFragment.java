@@ -1,5 +1,4 @@
 package com.example.moneymanager;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -19,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -28,7 +26,6 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,7 +34,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.squareup.picasso.Picasso;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,7 +53,6 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
-
     private Uri selectedImageUri;
     private ImageView imageViewComprobante;
     private ServicioAlmacenamiento servicioAlmacenamiento;
@@ -82,18 +77,17 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
             new ActivityResultContracts.RequestPermission(),
             isGranted -> {
                 if (isGranted) {
-                    Toast.makeText(getContext(), "Permiso concedido para guardar archivos.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Permiso acepdado para guardar archivos.", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getContext(), "Permiso denegado. No se podrán guardar archivos.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Permiso denegado para guardar archivos.", Toast.LENGTH_LONG).show();
                 }
             });
-
 
     public EgresosFragment() {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {  // es la misma funcion que el fragment de ingresos
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -102,9 +96,7 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
 
         if (getActivity() != null) {
             servicioAlmacenamiento = ((MyApplication) getActivity().getApplication()).getServicioAlmacenamiento();
-            Log.d(TAG, "ServicioAlmacenamiento obtenido de MyApplication.");
         } else {
-            Log.e(TAG, "Error: Actividad nula al intentar obtener ServicioAlmacenamiento. Inicializando localmente (fallback).");
             servicioAlmacenamiento = new ServicioAlmacenamiento(getContext());
         }
     }
@@ -150,12 +142,10 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
                             Egreso egreso = document.toObject(Egreso.class);
                             if (egreso != null) {
                                 egreso.setId(document.getId());
-
                                 String urlFromFirebase = egreso.getComprobanteUrl();
                                 if (urlFromFirebase != null && urlFromFirebase.startsWith("http://")) {
-                                    Log.w(TAG, "Firebase Egreso URL es HTTP, convirtiendo a HTTPS: " + urlFromFirebase);
                                     egreso.setComprobanteUrl(urlFromFirebase.replace("http://", "https://"));
-                                } else {
+                                }else{
                                     Log.d(TAG, "Firebase Egreso URL es ya HTTPS o nula: " + urlFromFirebase);
                                 }
                                 egresosList.add(egreso);
@@ -167,8 +157,7 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
                         });
                         adapter.setTransactionList(egresosList);
                     } else {
-                        Toast.makeText(getContext(), "Error al cargar egresos: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error loading egresos", task.getException());
+                        Toast.makeText(getContext(), "Error al cargar egresos", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -178,7 +167,6 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_add_edit_transaction, null);
         builder.setView(dialogView);
-
         EditText editTextTitulo = dialogView.findViewById(R.id.editTextTitulo);
         EditText editTextMonto = dialogView.findViewById(R.id.editTextMonto);
         EditText editTextDescripcion = dialogView.findViewById(R.id.editTextDescripcion);
@@ -186,10 +174,8 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
         Button buttonSave = dialogView.findViewById(R.id.buttonSave);
         Button buttonCancel = dialogView.findViewById(R.id.buttonCancel);
         TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
-
         imageViewComprobante = dialogView.findViewById(R.id.imageViewComprobante);
         Button buttonSelectImage = dialogView.findViewById(R.id.buttonSelectImage);
-
         selectedImageUri = null;
         imageViewComprobante.setImageResource(R.drawable.ic_image_placeholder);
         imageViewComprobante.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -205,8 +191,6 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
             if (egresoToEdit.getFecha() != null) {
                 editTextFecha.setText(sdf.format(egresoToEdit.getFecha()));
             }
-            //editTextTitulo.setEnabled(false);
-            //editTextFecha.setEnabled(false);
 
             if (egresoToEdit.getComprobanteUrl() != null && !egresoToEdit.getComprobanteUrl().isEmpty()) {
                 Picasso.get()
@@ -235,7 +219,6 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
                     calendar.setTime(sdf.parse(editTextFecha.getText().toString()));
                 } catch (Exception e) {
                     Toast.makeText(getContext(), "Formato de fecha inválido. Usando fecha actual.", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error parsing date: " + e.getMessage());
                 }
             }
 
@@ -254,7 +237,6 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
         });
 
         buttonSelectImage.setOnClickListener(v -> selectImageLauncher.launch("image/*"));
-
 
         buttonSave.setOnClickListener(v -> {
             String titulo = editTextTitulo.getText().toString().trim();
@@ -285,7 +267,6 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
                 fecha = sdf.parse(fechaStr);
             } catch (java.text.ParseException e) {
                 Toast.makeText(getContext(), "Formato de fecha no válido", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Error parsing date: " + e.getMessage());
                 return;
             }
 
@@ -295,18 +276,17 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
             }
 
             if (selectedImageUri != null) {
-                Toast.makeText(getContext(), "Subiendo comprobante...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Subiendo comprobante", Toast.LENGTH_SHORT).show();
                 servicioAlmacenamiento.guardarArchivo(selectedImageUri, new ServicioAlmacenamiento.UploadResultListener() {
                     @Override
                     public void onSuccess(String url) {
-                        Toast.makeText(getContext(), "Comprobante subido.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Comprobante subido", Toast.LENGTH_SHORT).show();
                         saveOrUpdateEgreso(egresoToEdit, titulo, monto, descripcion, fecha, url, dialog);
                     }
 
                     @Override
                     public void onFailure(String error) {
-                        Toast.makeText(getContext(), "Error al subir comprobante: " + error, Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Error uploading file: " + error);
+                        Toast.makeText(getContext(), "Error al subir comprobante", Toast.LENGTH_LONG).show();
                         saveOrUpdateEgreso(egresoToEdit, titulo, monto, descripcion, fecha, (egresoToEdit != null ? egresoToEdit.getComprobanteUrl() : null), dialog);
                     }
                 });
@@ -324,26 +304,24 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
             DocumentReference egresoRef = db.collection("egresos").document(egresoToEdit.getId());
             egresoRef.update("monto", monto, "descripcion", descripcion, "fecha", fecha, "comprobanteUrl", comprobanteUrl)
                     .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(getContext(), "Egreso actualizado con éxito",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Egreso actualizado",Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                         loadEgresos();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error al actualizar egreso: " + e.getMessage(),Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error updating egreso", e);
+                        Toast.makeText(getContext(), "Error al actualizar egreso",Toast.LENGTH_SHORT).show();
                     });
         } else {
             Egreso nuevoEgreso = new Egreso(currentUser.getUid(), titulo, monto, descripcion, fecha, comprobanteUrl);
             db.collection("egresos")
                     .add(nuevoEgreso)
                     .addOnSuccessListener(documentReference -> {
-                        Toast.makeText(getContext(), "Egreso agregado con éxito",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Egreso agregado",Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                         loadEgresos();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error al agregar egreso: " + e.getMessage(),Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error adding egreso", e);
+                        Toast.makeText(getContext(), "Error al agregar egreso",Toast.LENGTH_SHORT).show();
                     });
         }
     }
@@ -363,24 +341,20 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
         db.collection("egresos").document(transactionId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Egreso eliminado con éxito",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Egreso eliminado",Toast.LENGTH_SHORT).show();
                     loadEgresos();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error al eliminar egreso: " + e.getMessage(),Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error deleting egreso", e);
+                    Toast.makeText(getContext(), "Error al eliminar egreso",Toast.LENGTH_SHORT).show();
                 });
     }
 
     @Override
     public void onDownloadClick(String comprobanteUrl, Egreso egreso) {
         if (comprobanteUrl != null && !comprobanteUrl.isEmpty()) {
-            Log.d(TAG, "Intentando descargar URL de Firestore (en onDownloadClick): " + comprobanteUrl);
-
             final String finalDownloadUrl;
             if (comprobanteUrl.startsWith("http://")) {
                 finalDownloadUrl = comprobanteUrl.replace("http://", "https://");
-                Log.w(TAG, "Corrigiendo URL de descarga a HTTPS: " + finalDownloadUrl);
             } else {
                 finalDownloadUrl = comprobanteUrl;
             }
@@ -388,25 +362,23 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
             servicioAlmacenamiento.obtenerArchivo(finalDownloadUrl, new ServicioAlmacenamiento.DownloadResultListener() {
                 @Override
                 public void onSuccess(File file) {
-                    Toast.makeText(getContext(), "Comprobante descargado: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Comprobante descargado", Toast.LENGTH_LONG).show();
                     openFile(file);
                 }
 
                 @Override
                 public void onFailure(String error) {
-                    Toast.makeText(getContext(), "Error al descargar comprobante: " + error, Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "Descarga fallida para URL: " + finalDownloadUrl + " Error: " + error);
+                    Toast.makeText(getContext(), "Error al descargar comprobante", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(getContext(), "No hay comprobante asociado a esta transacción.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "No hay comprobante asociado", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void openFile(File file) {
         if (!file.exists()) {
-            Toast.makeText(getContext(), "El archivo descargado no existe.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Intento de abrir archivo que no existe: " + file.getAbsolutePath());
+            Toast.makeText(getContext(), "El archivo descargado no existe", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -422,18 +394,14 @@ public class EgresosFragment extends Fragment implements TransactionAdapter.OnTr
             if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
             } else {
-                Toast.makeText(getContext(), "No hay aplicación para abrir este tipo de archivo.", Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "No hay aplicación disponible para abrir el archivo con MIME type: " + (mimeType != null ? mimeType : "*/*"));
+                Toast.makeText(getContext(), "No hay aplicación para abrir este tipo de archivo", Toast.LENGTH_SHORT).show();
             }
         } catch (IllegalArgumentException e) {
-            Toast.makeText(getContext(), "Error de configuración al abrir el archivo: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Error de FileProvider: " + e.getMessage(), e);
+            Toast.makeText(getContext(), "Error de configuración al abrir el archivo", Toast.LENGTH_LONG).show();
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(getContext(), "No se encontró una aplicación para abrir el archivo.", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "ActivityNotFoundException al abrir el archivo: " + e.getMessage(), e);
+            Toast.makeText(getContext(), "No se encontró una aplicación para abrir el archivo", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Error inesperado al intentar abrir el archivo: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Error general al abrir el archivo: " + e.getMessage(), e);
+            Toast.makeText(getContext(), "Error inesperado al intentar abrir el archivo", Toast.LENGTH_LONG).show();
         }
     }
 }

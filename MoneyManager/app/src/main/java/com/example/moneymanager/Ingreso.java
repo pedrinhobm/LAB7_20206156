@@ -12,7 +12,6 @@ public class Ingreso {
     private String comprobanteUrl;
 
     public Ingreso() {
-        // Constructor vacío requerido por Firestore
     }
 
     public Ingreso(String userId, String titulo, double monto, String descripcion, Date fecha) {
@@ -21,10 +20,9 @@ public class Ingreso {
         this.monto = monto;
         this.descripcion = descripcion;
         this.fecha = fecha;
-        this.comprobanteUrl = null; // Por defecto sin comprobante
+        this.comprobanteUrl = null;
     }
 
-    // Nuevo constructor para incluir el comprobanteUrl
     public Ingreso(String userId, String titulo, double monto, String descripcion, Date fecha, String comprobanteUrl) {
         this.userId = userId;
         this.titulo = titulo;
@@ -34,7 +32,6 @@ public class Ingreso {
         this.comprobanteUrl = comprobanteUrl;
     }
 
-    // Getters y Setters
     public String getId() {
         return id;
     }
@@ -83,7 +80,6 @@ public class Ingreso {
         this.fecha = fecha;
     }
 
-    // Getter y Setter para comprobanteUrl
     public String getComprobanteUrl() {
         return comprobanteUrl;
     }

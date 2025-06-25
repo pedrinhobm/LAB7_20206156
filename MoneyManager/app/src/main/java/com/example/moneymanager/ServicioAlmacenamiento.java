@@ -1,14 +1,11 @@
 package com.example.moneymanager;
-
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,171 +14,138 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.Map;
 
+// como se indicó en el enuncado , esta clase tiene como rol de gestionar las operaciones de almacenamiento de los archivos
+// con el CLoudinary tanto subidas como descargas , sobretodo de las imagenes
+
 public class ServicioAlmacenamiento {
-
     private static final String TAG = "ServicioAlmacenamiento";
-    private final Context context;
+    private final Context context; // servirá para las operaciones del archivo y Cloudinary
 
-    public interface UploadResultListener {
-        void onSuccess(String url);
+    public interface UploadResultListener { // asi que dividimos la clase en 2 ártes : subida o actualización / descarga
+        void onSuccess(String url);  // en cada, se explicará los casos de error y éxito
         void onFailure(String error);
     }
-
     public interface DownloadResultListener {
         void onSuccess(File file);
         void onFailure(String error);
     }
 
     public ServicioAlmacenamiento(Context context) {
-        // Al recibir el contexto, asegúrate de almacenar el ApplicationContext para uso futuro.
-        // Esto previene fugas de memoria si se le pasa un Activity Context.
-        this.context = context.getApplicationContext();
-        Log.d(TAG, "ServicioAlmacenamiento inicializado con Application Context.");
+        this.context = context.getApplicationContext(); // Al recibir el contexto, se asegura de almacenar el ApplicationContext para uso futuro
+        // Así se evita fugas de memoria, es decir que se estalece la conexion al servicio Cloudinary con la clase anterior MyApplication
     }
 
-    // *** MÉTODO conexionAlServicio ELIMINADO ***
-    // La inicialización de Cloudinary ahora se maneja exclusivamente en MyApplication.java
-    // Esto asegura que MediaManager.init() se llama una única vez con el Application Context.
-
-
-    /**
-     * Uploads a file to Cloudinary.
-     *
-     * @param fileUri The URI of the file to upload.
-     * @param listener Callback for upload results.
-     */
     public void guardarArchivo(Uri fileUri, final UploadResultListener listener) {
-        try {
-            // Asegúrate de que MediaManager ha sido inicializado (esto lo hace MyApplication)
-            // Si MediaManager no se ha inicializado, MediaManager.get() lanzará una IllegalStateException.
-            MediaManager.get().upload(fileUri)
-                    .option("folder", "money_manager_comprobantes")
+        try { // aqui si use IA porque necesitaba como se tenía que llevar los datos al servidor
+            MediaManager.get().upload(fileUri) // el proceso inicia con la subida del archivo
+                    .option("folder", "money_manager_comprobantes") // esta es la carpeta donde se guardarán las imagenes en Cloudinary
                     .callback(new UploadCallback() {
                         @Override
                         public void onStart(String requestId) {
-                            Log.d(TAG, "Subida iniciada para requestId: " + requestId);
+                            Log.d(TAG, "Subida iniciada para requestId");
                         }
 
-                        @Override
+                        @Override // aqui se llama para reportar el progreso de subida
                         public void onProgress(String requestId, long bytes, long totalBytes) {
-                            double progress = (double) bytes / totalBytes;
+                            double progress = (double) bytes / totalBytes; // lo distribuimos por como ha avanzado el requestId
                             Log.d(TAG, "Progreso de subida para requestId " + requestId + ": " + (int)(progress * 100) + "%");
                         }
 
                         @Override
                         public void onSuccess(String requestId, Map resultData) {
-                            String url = (String) resultData.get("url");
-                            Log.d(TAG, "Uploaded URL from Cloudinary: " + url);
-                            listener.onSuccess(url);
+                            String url = (String) resultData.get("url"); // se llama una subida exotsa
+                            listener.onSuccess(url); // el resutlData es el contenido de la imagen subida junto al URL
                         }
 
                         @Override
                         public void onError(String requestId, ErrorInfo error) {
-                            Log.e(TAG, "Error en la subida para requestId " + requestId + ": " + error.getDescription());
-                            listener.onFailure(error.getDescription());
+                            listener.onFailure(error.getDescription()); // en los casos no deseados, llamos por si hubo un error
                         }
 
                         @Override
-                        public void onReschedule(String requestId, ErrorInfo error) {
+                        public void onReschedule(String requestId, ErrorInfo error) { // esto si use ia en caso hubiera fallos por problemas técicos de red
                             Log.w(TAG, "Subida reprogramada para requestId " + requestId + ": " + error.getDescription());
                         }
+
                     }).dispatch();
         } catch (IllegalStateException e) {
-            // Este catch es vital. Ocurrirá si guardarArchivo se llama ANTES de que MyApplication
-            // haya inicializado Cloudinary. Si el flujo es correcto, esto no debería pasar.
-            listener.onFailure("Cloudinary no está inicializado. Error de configuración de la aplicación.");
-            Log.e(TAG, "Error: MediaManager.get() llamado antes de la inicialización adecuada en MyApplication: " + e.getMessage());
+            listener.onFailure("Cloudinary no está inicializado");
         } catch (Exception e) {
-            listener.onFailure("Error inesperado al intentar subir archivo: " + e.getMessage());
-            Log.e(TAG, "Error inesperado en guardarArchivo: " + e.getMessage(), e);
+            listener.onFailure("Error inesperado al intentar subir archivo");
         }
     }
 
-    /**
-     * Downloads a file from a given URL.
-     *
-     * @param fileUrl The URL of the file to download.
-     * @param listener Callback for download results.
-     */
+    // la siguiente funcion es la descarga del archivo
+    // aqui si use un hilo AysncTask para que bloquee la UI
     public void obtenerArchivo(String fileUrl, final DownloadResultListener listener) {
-        Log.d(TAG, "ServicioAlmacenamiento recibió URL para descargar: " + fileUrl);
-        if (fileUrl == null || fileUrl.isEmpty()) {
-            listener.onFailure("URL de archivo vacía o nula.");
+        if (fileUrl == null || fileUrl.isEmpty()) { // si no hay nada, confirmara como falla
+            listener.onFailure("URL de archivo vacía");
             return;
-        }
-
-        // Usa el AsyncTask anidado estático para evitar fugas de memoria
-        // Pasa el Application Context almacenado al AsyncTask
-        new DownloadFileAsyncTask(context, listener).execute(fileUrl);
+        } // el proceso inicia con el metodo indicado tambien para evitar fuga de memoria
+        new DownloadFileAsyncTask(context, listener).execute(fileUrl); //  DownloadFileAsyncTask, similar a lo visto en IEE06
     }
 
-    // Declara AsyncTask como una clase anidada estática para prevenir fugas de memoria
     private static class DownloadFileAsyncTask extends AsyncTask<String, Void, File> {
-        private final Context context;
-        private final DownloadResultListener listener;
+        private final Context context; // tambien use IA ara el asynctask porque
+        private final DownloadResultListener listener; // se requieria manejar operaciones de red del hilo main
         private String errorMessage = null;
-        private static final String TAG = "ServicioAlmacenamiento.DownloadTask"; // Nombre de TAG más específico
+        private static final String TAG = "ServicioAlmacenamiento.DownloadTask";
 
-        // El constructor recibe el ApplicationContext de ServicioAlmacenamiento
         DownloadFileAsyncTask(Context context, DownloadResultListener listener) {
-            this.context = context; // Ya es el ApplicationContext, no necesitas .getApplicationContext() aquí de nuevo
+            this.context = context; // es por ello que armo un constructor para recibir su applicationContext
             this.listener = listener;
         }
 
         @Override
         protected File doInBackground(String... params) {
-            String urlString = params[0];
+            String urlString = params[0]; // para esa función, obtiene el URL
             InputStream input = null;
             OutputStream output = null;
             HttpURLConnection connection = null;
             File file = null;
             try {
-                java.net.URL url = new java.net.URL(urlString);
+                java.net.URL url = new java.net.URL(urlString); // luego abre y establece la conexión HTTP
                 connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
 
-                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) { // despues, valida la respuesta del servidor si es conforme
                     errorMessage = "Server returned HTTP " + connection.getResponseCode()
                             + " " + connection.getResponseMessage() + " para URL: " + urlString;
                     Log.e(TAG, errorMessage);
-                    return null;
+                    return null; // si sucede el escenario de fallo de respuesta HTTP lo returna nulo
                 }
 
-                input = connection.getInputStream();
-                // Crea un archivo temporal en el directorio de caché de la aplicación
-                // Asegúrate de que context.getCacheDir() no sea nulo.
-                // context aquí es el ApplicationContext, que siempre debería tener un directorio de caché.
+                input = connection.getInputStream(); // aquí se obtiene el stream de entrada de conexión
+                // para ello , se crea un archivo temporal en el directorio de caché de la aplicación
                 file = File.createTempFile("image_comprobante_", ".jpg", context.getCacheDir());
-                output = new FileOutputStream(file);
+                output = new FileOutputStream(file); //  luego la salida
 
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = input.read(buffer)) != -1) {
+                byte[] buffer = new byte[4096]; // este es el buffer que lee los datos por bloque
+                int bytesRead; // en la iterativa leera el stream de entrada y luego ecibe la salida
+                while ((bytesRead = input.read(buffer)) != -1) { // hasta que no haya datos
                     output.write(buffer, 0, bytesRead);
                 }
-                Log.d(TAG, "Archivo descargado exitosamente a: " + file.getAbsolutePath());
-                return file;
+                return file; // y es asi como se devuelve el archivo ya descargado
             } catch (IOException e) {
                 errorMessage = "Error al descargar el archivo desde " + urlString + ": " + e.getMessage();
-                Log.e(TAG, errorMessage, e);
                 return null;
             } finally {
-                try {
+                try { // y ya por ultimo se confgirma que la conexion y los streams esten cerrados
                     if (output != null) output.close();
                     if (input != null) input.close();
                     if (connection != null) connection.disconnect();
                 } catch (IOException e) {
-                    Log.e(TAG, "Error al cerrar streams/desconectar después de la descarga: " + e.getMessage(), e);
+                    Log.e(TAG, "Error al cerrar streams/desconectar después de la descarga");
                 }
             }
         }
 
         @Override
-        protected void onPostExecute(File downloadedFile) {
-            if (listener != null) {
+        protected void onPostExecute(File downloadedFile) { // este es el hilo main que mencione anteriormente
+            if (listener != null) {// actualiza la UI y notifica el resultado al listener del archivo a descargar
                 if (downloadedFile != null) {
                     listener.onSuccess(downloadedFile);
-                } else {
+                } else { // en caso de error , lo informará
                     listener.onFailure(errorMessage != null ? errorMessage : "No se pudo descargar el archivo.");
                 }
             }

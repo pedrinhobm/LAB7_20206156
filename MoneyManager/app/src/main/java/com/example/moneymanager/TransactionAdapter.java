@@ -25,11 +25,10 @@ public class TransactionAdapter<T> extends RecyclerView.Adapter<TransactionAdapt
     private final OnTransactionActionListener<T> listener;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
-    public interface OnTransactionActionListener<T> {
+    public interface OnTransactionActionListener<T> { // aqui realizamos CRUDs de editar y eliminar
         void onEditClick(String transactionId, T transaction);
         void onDeleteClick(String transactionId, T transaction);
-        // CAMBIO CRUCIAL AQUÍ: El primer parámetro DEBE ser la URL
-        void onDownloadClick(String comprobanteUrl, T transaction);
+        void onDownloadClick(String comprobanteUrl, T transaction); // añadimos el campo para la descarga de imagen y URL
     }
 
     public TransactionAdapter(Context context, List<T> transactionList, boolean isIngreso, OnTransactionActionListener<T> listener) {
@@ -60,17 +59,17 @@ public class TransactionAdapter<T> extends RecyclerView.Adapter<TransactionAdapt
         double monto;
         String descripcion;
         String fecha;
-        String comprobanteUrl = null; // Correcto: se inicializa a null, se le asigna un valor más abajo
+        String comprobanteUrl = null;
 
-        if (isIngreso) {
-            Ingreso ingreso = (Ingreso) transaction;
-            id = ingreso.getId();
+        if (isIngreso) { // con el mismo booleano recolectamos los datos de cada uno , lo mismo con egreso
+            Ingreso ingreso = (Ingreso) transaction; // el titulo, monto numérico, la descripcion, fecha y el id
+            id = ingreso.getId(); // ahora le agregamos EL NUEVO CAMPO para LAS DESCARGAS URL
             titulo = ingreso.getTitulo();
             monto = ingreso.getMonto();
             descripcion = ingreso.getDescripcion();
             fecha = (ingreso.getFecha() != null) ? dateFormat.format(ingreso.getFecha()) : "N/A";
             comprobanteUrl = ingreso.getComprobanteUrl();
-        } else {
+        } else { // aqui formateo los egresos
             Egreso egreso = (Egreso) transaction;
             id = egreso.getId();
             titulo = egreso.getTitulo();
@@ -85,35 +84,30 @@ public class TransactionAdapter<T> extends RecyclerView.Adapter<TransactionAdapt
         holder.descripcionTextView.setText(descripcion);
         holder.fechaTextView.setText(fecha);
 
-        if (isIngreso) {
+        if (isIngreso) { // aqui formateo los ingresos con el booleano
             holder.montoTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
-        } else {
+        } else { // aqui formateo los egresos
             holder.montoTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
-        }
+        } // en cierta parte tuve que mejorar el diseño porque quise darle más prioridad al enunciado propusto
 
-        // Asegúrate de que comprobanteUrl se maneja correctamente aquí
-        if (comprobanteUrl != null && !comprobanteUrl.isEmpty()) {
-            holder.imageViewComprobanteItem.setVisibility(View.VISIBLE);
+        if (comprobanteUrl != null && !comprobanteUrl.isEmpty()) { // se validala existencia un URL para comprobar
+            holder.imageViewComprobanteItem.setVisibility(View.VISIBLE); // es decir si se subio ua iamgen
             holder.buttonDownload.setVisibility(View.VISIBLE);
-            Picasso.get()
-                    .load(comprobanteUrl)
-                    .placeholder(R.drawable.ic_image_placeholder)
-                    .error(R.drawable.ic_image_placeholder)
+            Picasso.get() // para imagenes use IA con proceso de Picasso para cargar imagenes
+                    .load(comprobanteUrl) // de esta forma optimiza cargarlas desde los URLs de Inernet
+                    .placeholder(R.drawable.ic_image_placeholder) // es mas automatico que un hilo o estar decodificacion
+                    .error(R.drawable.ic_image_placeholder) // se indica la imagen a descargar, luego lo muestra
                     .into(holder.imageViewComprobanteItem);
         } else {
-            holder.imageViewComprobanteItem.setVisibility(View.GONE);
+            holder.imageViewComprobanteItem.setVisibility(View.GONE); // el imageview se vuelve invisible para que no ocupe espacio innecesario
             holder.imageViewComprobanteItem.setImageDrawable(null);
-            holder.buttonDownload.setVisibility(View.GONE);
+            holder.buttonDownload.setVisibility(View.GONE); // lo mismo con el boton
         }
-
-        // Asegúrate de que 'id' es final o efectivamente final si se usa en el listener de borrado o edición
         final String finalId = id;
-
-        // CAMBIO AQUÍ: Pasa la comprobanteUrl real al listener de descarga
-        final String finalComprobanteUrl = comprobanteUrl; // Hazla final para usarla en el lambda
+        final String finalComprobanteUrl = comprobanteUrl;
         holder.editButton.setOnClickListener(v -> listener.onEditClick(finalId, transaction));
         holder.deleteButton.setOnClickListener(v -> listener.onDeleteClick(finalId, transaction));
-        holder.buttonDownload.setOnClickListener(v -> listener.onDownloadClick(finalComprobanteUrl, transaction)); // <-- ¡CORREGIDO!
+        holder.buttonDownload.setOnClickListener(v -> listener.onDownloadClick(finalComprobanteUrl, transaction));
     }
 
     @Override
