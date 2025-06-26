@@ -142,7 +142,7 @@ public class ServicioAlmacenamiento {
 
         @Override
         protected void onPostExecute(File downloadedFile) { // este es el hilo main que mencione anteriormente
-            if (listener != null) {// actualiza la UI y notifica el resultado al listener del archivo a descargar
+            if (listener != null) {// y actualiza la UI y notifica el resultado al listener del archivo a descargar
                 if (downloadedFile != null) {
                     listener.onSuccess(downloadedFile);
                 } else { // en caso de error , lo informará
