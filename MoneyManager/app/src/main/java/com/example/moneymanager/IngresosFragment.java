@@ -151,7 +151,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                                 ingresosList.add(ingreso);
                             }
                         }
-                        Collections.sort(ingresosList, (i1, i2) -> { // Change to i1, i2 for Ingreso
+                        Collections.sort(ingresosList, (i1, i2) -> {
                             if (i1.getFecha() == null || i2.getFecha() == null) return 0;
                             return i2.getFecha().compareTo(i1.getFecha());
                         });
@@ -162,7 +162,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                 });
     }
 
-    private void showAddEditTransactionDialog(@Nullable Ingreso ingresoToEdit) { // Change type to Ingreso
+    private void showAddEditTransactionDialog(@Nullable Ingreso ingresoToEdit) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_add_edit_transaction, null);
@@ -299,7 +299,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
         dialog.show();
     }
 
-    private void saveOrUpdateIngreso(@Nullable Ingreso ingresoToEdit, String titulo, double monto, String descripcion, Date fecha, @Nullable String comprobanteUrl, AlertDialog dialog) { // Change type to Ingreso
+    private void saveOrUpdateIngreso(@Nullable Ingreso ingresoToEdit, String titulo, double monto, String descripcion, Date fecha, @Nullable String comprobanteUrl, AlertDialog dialog) {
         if (ingresoToEdit != null) {
             DocumentReference ingresoRef = db.collection("ingresos").document(ingresoToEdit.getId());
             ingresoRef.update("monto", monto, "descripcion", descripcion, "fecha", fecha, "comprobanteUrl", comprobanteUrl)
@@ -312,7 +312,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
                         Toast.makeText(getContext(), "Error al actualizar ingreso",Toast.LENGTH_SHORT).show();
                     });
         } else {
-            Ingreso nuevoIngreso = new Ingreso(currentUser.getUid(), titulo, monto, descripcion, fecha, comprobanteUrl); // Change to Ingreso
+            Ingreso nuevoIngreso = new Ingreso(currentUser.getUid(), titulo, monto, descripcion, fecha, comprobanteUrl);
             db.collection("ingresos")
                     .add(nuevoIngreso)
                     .addOnSuccessListener(documentReference -> {
@@ -338,7 +338,7 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
             return;
         }
 
-        db.collection("ingresos").document(transactionId) // Change collection to "ingresos"
+        db.collection("ingresos").document(transactionId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Ingreso eliminado",Toast.LENGTH_SHORT).show();
@@ -350,21 +350,21 @@ public class IngresosFragment extends Fragment implements TransactionAdapter.OnT
     }
 
     @Override
-    public void onDownloadClick(String comprobanteUrl, Ingreso ingreso) {
-        if (comprobanteUrl != null && !comprobanteUrl.isEmpty()) {
-            final String finalDownloadUrl;
-            if (comprobanteUrl.startsWith("http://")) {
-                finalDownloadUrl = comprobanteUrl.replace("http://", "https://");
-            } else {
+    public void onDownloadClick(String comprobanteUrl, Ingreso ingreso) { // aqui cree una funcion del boton de descarga del comrobante
+        if (comprobanteUrl != null && !comprobanteUrl.isEmpty()) { // para descargar la imagen desde la nube
+            final String finalDownloadUrl; // para ello validamos si exite el URL
+            if (comprobanteUrl.startsWith("http://")) { // aqui si ue ia porque algunas url se guardaban como HTTP
+                finalDownloadUrl = comprobanteUrl.replace("http://", "https://"); // y como este dispostivo requiere HTTPS lo reemplazo para una mayor seguridad y para que sea visible el codigo
+            } else { // en un inicio lo he probado con http pero no me funcionaba
                 finalDownloadUrl = comprobanteUrl;
             }
 
             servicioAlmacenamiento.obtenerArchivo(finalDownloadUrl, new ServicioAlmacenamiento.DownloadResultListener() {
                 @Override
-                public void onSuccess(File file) {
+                public void onSuccess(File file) { // de esta forma asegura la conexion y funcionamiento correcto de descarga
                     Toast.makeText(getContext(), "Comprobante descargado", Toast.LENGTH_LONG).show();
-                    openFile(file);
-                }
+                    openFile(file); // una vez que fue extiosa , se llama el OpenFile para mostrar el selector de apps y abrir dicha imagen
+                } // lo mismo va ser en egresos
 
                 @Override
                 public void onFailure(String error) {
